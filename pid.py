@@ -12,6 +12,7 @@ def main():
     GPIO.init()
 
     # running
+    last = time.time()
     cnt = 0
     alarm = 0
     while True:
@@ -29,7 +30,8 @@ def main():
         if cnt >= 10:
             if alarm == 0:
                 alarm = 1
-                log.info("pir", "alarm")
+                log.info("pir", "alarm ({:.0f})".format(time.time() - last))
+                last = time.time()
             GPIO.sirene(1)
 
         time.sleep(0.1)
