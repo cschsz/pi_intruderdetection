@@ -78,3 +78,19 @@ def init():
 
     sirene(0)
     return
+
+#----------------------------[]
+if __name__=='__main__':
+    val = 0
+    try:
+        init()
+        while True:
+            print(pir())
+            sirene(val)
+            if val == 1:
+                val = 0
+            else:
+                val = 1
+            time.sleep(1)
+    except:
+        pass
