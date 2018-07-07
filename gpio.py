@@ -4,7 +4,9 @@ import time
 
 try:
     from RPi.GPIO import *
+    imp = True
 except ImportError:
+    imp = False
     #----------------------------[setmode]
     def setmode(board):
         return
@@ -23,6 +25,10 @@ except ImportError:
 
     #----------------------------[IN]
     def IN():
+        return
+
+    #----------------------------[PUD_DOWN]
+    def PUD_DOWN():
         return
 
     #----------------------------[LOW]
@@ -66,7 +72,8 @@ def pir():
 #----------------------------[init]
 def init():
     setmode(BOARD)
-    setup(pin_pir, IN)
+    if imp == True:
+        setup(pin_pir, IN, pull_up_down=PUD_DOWN)
     setup(pin_sir, OUT)
 
     sirene(0)
