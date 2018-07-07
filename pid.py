@@ -1,10 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import time
 
 # own modules
 import gpio as GPIO
-import time
 import log
+
+acnt  = 0
+alarm = False
+alast = time.time()
+
+#----------------------------[pir_check]
+def pir_check():
+    global alarm
+    global acnt
+    global alast
+
+    if GPIO.pir() == 1:
+        acnt += 1
+    else:
+        acnt = 0
+        if alarm == True:
+            alarm = False
+            log.info("pir", "reset ")
+            GPIO.sirene(0)
+
+    if acnt >= 10:
+        if alarm == False:
+            alarm = True
+            log.info("pir", "alarm ({:.0f})".format(time.time() - alast))
+            alast = time.time()
+        GPIO.sirene(1)
+    return
 
 #----------------------------[main]
 def main():
@@ -12,28 +39,8 @@ def main():
     GPIO.init()
 
     # running
-    last = time.time()
-    cnt = 0
-    alarm = 0
     while True:
-        val = GPIO.pir()
-        if val == 1:
-            cnt += 1
-        else:
-            cnt = 0
-            if alarm == 1:
-                alarm = 0
-                log.info("pir", "reset ")
-                GPIO.sirene(0)
-
-
-        if cnt >= 10:
-            if alarm == 0:
-                alarm = 1
-                log.info("pir", "alarm ({:.0f})".format(time.time() - last))
-                last = time.time()
-            GPIO.sirene(1)
-
+        pir_check()
         time.sleep(0.1)
 
 #----------------------------[]
