@@ -25,7 +25,7 @@ ps -aux | grep pid.py
 sudo kill [pid]
 ```
 
-## hardware layout
+## Hardware layout
 http://rpi.science.uoit.ca/lab/gpio/
 ```
        PIR
