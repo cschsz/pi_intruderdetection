@@ -3,8 +3,9 @@ PIR intruder detection with alarm sound and app control on raspberry pi
 
 Key features of this project are:
 * PIR
-* sirene
-* ...
+* Sirene
+* 433 MHz
+* Android app or web access
 
 Programm logging is found in /var/log/pid.log
 
