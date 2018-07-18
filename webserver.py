@@ -131,14 +131,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.resp_page(1)
         else:
             if val.find("arm1=") != -1:
-                log.info("websvr", "do_POST: {:s}".format(val))
                 fkt_armedupdate(1)
             elif val.find("arm2=") != -1:
-                log.info("websvr", "do_POST: {:s}".format(val))
                 fkt_armedupdate(2)
             elif val.find("disarm=") != -1:
-                log.info("websvr", "do_POST: {:s}".format(val))
                 fkt_armedupdate(0)
+            log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
             self.resp_page(0)
 
     def do_POST(self):
