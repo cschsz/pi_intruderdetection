@@ -53,6 +53,8 @@ except ImportError:
 
 pin_pir = 8
 pin_sir = 11
+pin_red = 36
+pin_bee = 11
 
 #----------------------------[sirene]
 def sirene(value):
@@ -62,6 +64,14 @@ def sirene(value):
         output(pin_sir, LOW)
     return
 
+#----------------------------[beeper]
+def beeper(value):
+    if value == 1:
+        output(pin_bee, HIGH)
+    else:
+        output(pin_bee, LOW)
+    return
+
 #----------------------------[pir]
 def pir():
     if input(pin_pir) == 1:
@@ -69,14 +79,27 @@ def pir():
     else:
         return 0
 
+#----------------------------[ledred]
+def ledred(value):
+    if value == 1:
+        output(pin_red, HIGH)
+    else:
+        output(pin_red, LOW)
+    return
+
+
 #----------------------------[init]
 def init():
     setmode(BOARD)
     if imp == True:
         setup(pin_pir, IN, pull_up_down=PUD_DOWN)
     setup(pin_sir, OUT)
+    setup(pin_red, OUT)
+    setup(pin_bee, OUT)
 
     sirene(0)
+    beeper(0)
+    ledred(0)
     return
 
 #----------------------------[]
@@ -93,4 +116,4 @@ if __name__=='__main__':
                 val = 1
             time.sleep(1)
     except:
-        pass
+        cleanup()
