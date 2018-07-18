@@ -54,6 +54,7 @@ except ImportError:
 pin_pir = 8
 pin_sir = 11
 pin_red = 36
+pin_grn = 37
 pin_bee = 11
 
 #----------------------------[sirene]
@@ -87,6 +88,13 @@ def ledred(value):
         output(pin_red, LOW)
     return
 
+#----------------------------[ledgrn]
+def ledgrn(value):
+    if value == 1:
+        output(pin_grn, HIGH)
+    else:
+        output(pin_grn, LOW)
+    return
 
 #----------------------------[init]
 def init():
@@ -95,11 +103,13 @@ def init():
         setup(pin_pir, IN, pull_up_down=PUD_DOWN)
     setup(pin_sir, OUT)
     setup(pin_red, OUT)
+    setup(pin_grn, OUT)
     setup(pin_bee, OUT)
 
     sirene(0)
     beeper(0)
     ledred(0)
+    ledgrn(0)
     return
 
 #----------------------------[]

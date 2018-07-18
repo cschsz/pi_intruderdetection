@@ -12,6 +12,9 @@ armed = 0
 piralarm = False
 piracnt  = 0
 piralast = time.time()
+atoggle = True
+stoggle = True
+scnt = 0
 
 #----------------------------[alarmstate]
 def alarmstate():
@@ -48,6 +51,36 @@ def pir_check():
             piralast = time.time()
     return
 
+#----------------------------[alarm_check]
+def alarm_check():
+    global atoggle
+
+    if armedstate():
+        if alarmstate():
+            if armedstate() == 1:
+                GPIO.sirene(1)
+            else:
+                GPIO.beeper(1)
+            atoggle = not atoggle
+            GPIO.ledred(atoggle)
+        else:
+            GPIO.ledred(1)
+    else:
+        GPIO.beeper(0)
+        GPIO.sirene(0)
+        GPIO.ledred(0)
+
+#----------------------------[status_led]
+def status_led():
+    global stoggle
+    global scnt
+
+    scnt += 1
+    if scnt >= 10:
+        scnt = 0
+        stoggle = not stoggle
+        GPIO.ledgrn(stoggle)
+
 #----------------------------[main]
 def main():
     # init
@@ -55,24 +88,11 @@ def main():
     webserver.start(alarmstate, armedstate, armedupdate)
 
     # running
-    toggle = True
     while True:
-        pir_check()
         time.sleep(0.1)
-        if armedstate():
-            if alarmstate():
-                if armedstate() == 1:
-                    GPIO.sirene(1)
-                else:
-                    GPIO.beeper(1)
-                toggle = not toggle
-                GPIO.ledred(toggle)
-            else:
-                GPIO.ledred(1)
-        else:
-            GPIO.beeper(0)
-            GPIO.sirene(0)
-            GPIO.ledred(0)
+        pir_check()
+        alarm_check()
+        status_led()
 
 #----------------------------[]
 if __name__=='__main__':
