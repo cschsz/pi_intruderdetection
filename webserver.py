@@ -8,11 +8,11 @@ import time
 import base64
 import ssl
 
-hsvr = None
-fkt_alarmstate = None
-fkt_armedstate = None
+s_hsvr = None
+s_key  = ""
+fkt_alarmstate  = None
+fkt_armedstate  = None
 fkt_armedupdate = None
-key = ""
 
 #----------------------------[readlog]
 def readlog():
@@ -67,9 +67,14 @@ def generatehtml(logflag):
             html += "<i class='fas fa-user-lock'></i>"
             html += "</button>"
         else:
-            html += "<button type='submit' class='btn btn-success btn-lg' name='disarm'>"
-            html += "Unscharf schalten&nbsp;"
-            html += "<i class='fas fa-lock-open'></i>"
+            if fkt_alarmstate() == -1:
+                html += "<button type='submit' class='btn btn-outline-danger btn-lg' name='disarm'>"
+                html += "Alarm zur&uuml;cksetzen&nbsp;"
+                html += "<i class='fas fa-exclamation-triangle'></i>"
+            else:
+                html += "<button type='submit' class='btn btn-success btn-lg' name='disarm'>"
+                html += "Unscharf schalten&nbsp;"
+                html += "<i class='fas fa-lock-open'></i>"
             html += "</button>"
         html += "</form>"
         html += "<hr>"
@@ -125,15 +130,15 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.resp_page(1)
 
     def do_GET(self):
-        global key
-        if key == "":
+        global s_key
+        if s_key == "":
             self.do_GET2()
         else:
             if self.headers.get('Authorization') == None:
                 self.resp_auth()
                 self.senddata("no auth header received")
                 pass
-            elif self.headers.get('Authorization') == "Basic "+key:
+            elif self.headers.get('Authorization') == "Basic "+s_key:
                 self.do_GET2()
                 pass
             else:
@@ -162,15 +167,15 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.resp_page(0)
 
     def do_POST(self):
-        global key
-        if key == "":
+        global s_key
+        if s_key == "":
             self.do_POST2()
         else:
             if self.headers.get('Authorization') == None:
                 self.resp_auth()
                 self.senddata("no auth header received")
                 pass
-            elif self.headers.get('Authorization') == "Basic "+key:
+            elif self.headers.get('Authorization') == "Basic "+s_key:
                 self.do_POST2()
                 pass
             else:
@@ -180,8 +185,8 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 #----------------------------[serverthread]
 def serverthread():
-    global hsvr
-    global key
+    global s_hsvr
+    global s_key
 
     log.info("websvr", "init")
 
@@ -199,14 +204,14 @@ def serverthread():
     # authentication
     phrase = user + ":" + pasw
     if len(phrase) > 1:
-        key = str(base64.b64encode(bytes(phrase, "utf-8")), "utf-8")
+        s_key = str(base64.b64encode(bytes(phrase, "utf-8")), "utf-8")
     else:
         log.info("websvr", "authentication is disabled")
 
     # start
     while True:
         try:
-            hsvr = HTTPServer(("", 4711), RequestHandler)
+            s_hsvr = HTTPServer(("", 4711), RequestHandler)
         except Exception:
             time.sleep(1)
 
@@ -214,11 +219,11 @@ def serverthread():
             f = open("/usr/local/etc/pid.pem","r")
             f.close()
             try:
-                hsvr.socket = ssl.wrap_socket(hsvr.socket, server_side=True, certfile="/usr/local/etc/pid.pem", ssl_version=ssl.PROTOCOL_TLSv1)
+                s_hsvr.socket = ssl.wrap_socket(s_hsvr.socket, server_side=True, certfile="/usr/local/etc/pid.pem", ssl_version=ssl.PROTOCOL_TLSv1)
                 break
             except Exception as e:
                 print (str(e))
-                hsvr.server_close()
+                s_hsvr.server_close()
                 time.sleep(1)
         except Exception:
             log.info("websvr", "https is disabled")
@@ -227,17 +232,17 @@ def serverthread():
     # running
     log.info("websvr", "started")
     try:
-        hsvr.serve_forever()
+        s_hsvr.serve_forever()
     except KeyboardInterrupt:
-        hsvr.server_close()
+        s_hsvr.server_close()
     log.info("websvr", "stop")
     return
 
 #----------------------------[stop]
 def stop():
-    global hsvr
-    if hsvr != None:
-        hsvr.shutdown()
+    global s_hsvr
+    if s_hsvr != None:
+        s_hsvr.shutdown()
     return
 
 #----------------------------[start]

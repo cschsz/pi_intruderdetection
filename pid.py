@@ -7,62 +7,72 @@ import gpio as GPIO
 import webserver
 import log
 
-armed = 0
+s_armed = 0
 
-piralarm = False
-piracnt  = 0
-piralast = time.time()
-atoggle = True
-stoggle = True
-scnt = 0
+s_galarm = False
+t_ga = time.time()
+s_needrst = False
+s_piralarm = False
+s_pircnt  = 0
+t_pirlast = time.time()
+s_atoggle = True
+s_stoggle = True
+s_scnt = 0
 
 #----------------------------[alarmstate]
 def alarmstate():
-    return piralarm
+    if   s_needrst:
+        return -1
+    elif s_piralarm:
+        return 1
+    else:
+        return 0
 
 #----------------------------[armedstate]
 def armedstate():
-    return armed
+    return s_armed
 
 #----------------------------[armedupdate]
 def armedupdate(val):
-    global armed
-    armed = val
+    global s_armed
+    s_armed = val
     return
 
 #----------------------------[pir_check]
 def pir_check():
-    global piralarm
-    global piracnt
-    global piralast
+    global s_piralarm
+    global s_pircnt
+    global t_pirlast
 
     if GPIO.pir() == 1:
-        piracnt += 1
+        s_pircnt += 1
     else:
-        piracnt = 0
-        if piralarm == True:
-            piralarm = False
-            log.info("pir", "reset ({:.0f})".format(time.time() - piralast))
+        s_pircnt = 0
+        if s_piralarm == True:
+            s_piralarm = False
+            log.info("pir", "reset ({:.0f})".format(time.time() - t_pirlast))
 
-    if piracnt >= 30:
-        if piralarm == False:
-            piralarm = True
-            log.info("pir", "alarm ({:.0f})".format(time.time() - piralast))
-            piralast = time.time()
+    if s_pircnt >= 30:
+        if s_piralarm == False:
+            s_piralarm = True
+            log.info("pir", "alarm ({:.0f})".format(time.time() - t_pirlast))
+            t_pirlast = time.time()
     return
 
 #----------------------------[alarm_check]
 def alarm_check():
-    global atoggle
+    global s_atoggle
+    global s_needrst
 
     if armedstate():
-        if alarmstate():
+        if s_piralarm == True:
             if armedstate() == 1:
                 GPIO.sirene(1)
             else:
                 GPIO.beeper(1)
-            atoggle = not atoggle
-            GPIO.ledred(atoggle)
+            s_atoggle = not s_atoggle
+            GPIO.ledred(s_atoggle)
+            s_needrst = True
         else:
             GPIO.ledred(1)
     else:
@@ -72,14 +82,14 @@ def alarm_check():
 
 #----------------------------[status_led]
 def status_led():
-    global stoggle
-    global scnt
+    global s_stoggle
+    global s_scnt
 
-    scnt += 1
-    if scnt >= 10:
-        scnt = 0
-        stoggle = not stoggle
-        GPIO.ledgrn(stoggle)
+    s_scnt += 1
+    if s_scnt >= 10:
+        s_scnt = 0
+        s_stoggle = not s_stoggle
+        GPIO.ledgrn(s_stoggle)
 
 #----------------------------[main]
 def main():
