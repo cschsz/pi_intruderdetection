@@ -34,7 +34,70 @@ def readlog():
 
     return log
 
-#----------------------------[MyServer]
+#----------------------------[generatehtml]
+def generatehtml(logflag):
+    html  = "<!docstype html>"
+    html += "<html lang='de'>"
+    html += "<head>"
+    html += "<meta charset='UTF-8'>"
+    html += "<meta name='viewport' content='width=device-width, initial-scale=1'>"
+    html += "<title>PId</title>"
+    if logflag == 0:
+        html += "<meta http-equiv='refresh' content='5'>"
+    html += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>"
+    html += "<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.1.1/css/all.css' integrity='sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ' crossorigin='anonymous'>"
+    #html += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'>"
+    html += "</head>"
+    html += "<body>"
+    html += "<div class='container'>"
+    html += "<main>"
+    if logflag == 0:
+        html += "<h2><i class='fas fa-home'></i> PId</h2>"
+        html += "<p>{:s}</p>".format(time.strftime("%d.%m.%Y %H:%M:%S",time.localtime()))
+        html += "<hr>"
+        html += "<form action='' method='post'>"
+        if fkt_armedstate() == 0:
+            html += "<button type='submit' class='btn btn-danger btn-lg' name='arm1'>"
+            html += "Scharf&nbsp;"
+            html += "<i class='fas fa-lock'></i>"
+            html += "</button>"
+            html += "&nbsp;"
+            html += "<button type='submit' class='btn btn-danger btn-lg' name='arm2'>"
+            html += "Teilscharf&nbsp;"
+            html += "<i class='fas fa-user-lock'></i>"
+            html += "</button>"
+        else:
+            html += "<button type='submit' class='btn btn-success btn-lg' name='disarm'>"
+            html += "Unscharf schalten&nbsp;"
+            html += "<i class='fas fa-lock-open'></i>"
+            html += "</button>"
+        html += "</form>"
+        html += "<hr>"
+        if   fkt_armedstate() == 1:
+            html += "<div class='alert alert-danger' role='alert'>Status: scharf <i class='fas fa-lock'></i></div>"
+        elif fkt_armedstate() == 2:
+            html += "<div class='alert alert-warning' role='alert'>Status: teilscharf <i class='fas fa-user-lock'></i></div>"
+        else:
+            html += "<div class='alert alert-success' role='alert'>Status: unscharf <i class='fas fa-lock-open'></i></div>"
+        html += "<div class='alert alert-success' role='alert'>Haust&uuml;r: abgeschlossen</div>"
+        html += "<div class='alert alert-success' role='alert'>Kellert&uuml;r: abgeschlossen</div>"
+        html += "<div class='alert alert-success' role='alert'>Gasmelder: OK</div>"
+        html += "<hr>"
+        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='log'>Logfile <i class='fas fa-caret-right'></i></button></form>"
+    else:
+        html += "<h2><i class='fas fa-file'></i> Logfile</h2>"
+        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='main'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
+        html += "<p><pre>"
+        html += readlog()
+        html += "</pre></p>"
+        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='main'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
+    html += "</main>"
+    html += "</div>"
+    html += "</body>"
+    html += "</html>"
+    return html
+
+#----------------------------[RequestHandler]
 class RequestHandler(BaseHTTPRequestHandler):
     def resp_header(self):
         self.send_response(200)
@@ -51,51 +114,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes(data, "utf-8"))
 
     def resp_page(self, logflag):
-        self.senddata("<!docstype html>")
-        self.senddata("<html lang='de'>")
-        self.senddata("<head>")
-        self.senddata("<meta charset='UTF-8'>")
-        self.senddata("<meta name='viewport' content='width=device-width, initial-scale=1'>")
-        self.senddata("<title>PId</title>")
-        if logflag == 0:
-            self.senddata("<meta http-equiv='refresh' content='5'>")
-        #self.senddata("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>")
-        self.senddata("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'>")
-        self.senddata("</head>")
-        self.senddata("<body>")
-        self.senddata("<div class='container'>")
-        self.senddata("<main>")
-        if logflag == 0:
-            self.senddata("<h2><span class='glyphicon glyphicon-home' aria-hidden='true'></span> PId</h2>")
-            self.senddata("<p>{:s}</p>".format(time.strftime("%d.%m.%Y %H:%M:%S",time.localtime())))
-            self.senddata("<hr>")
-            if fkt_armedstate() == 0:
-                self.senddata("<form action='' method='post'><button type='submit' class='btn btn-danger btn-lg' name='arm1'>Scharf <span class='glyphicon glyphicon-lock' aria-hidden='true'></span></button> <button type='submit' class='btn btn-danger btn-lg' name='arm2'>Teilscharf <span class='glyphicon glyphicon-bed' aria-hidden='true'></span></button></form>")
-            else:
-                self.senddata("<form action='' method='post'><button type='submit' class='btn btn-success btn-lg' name='disarm'>Unscharf schalten <span class='glyphicon glyphicon-user' aria-hidden='true'></span></button></form>")
-            self.senddata("<hr>")
-            if   fkt_armedstate() == 1:
-                self.senddata("<div class='alert alert-danger' role='alert'>Status: scharf</div>")
-            elif fkt_armedstate() == 2:
-                self.senddata("<div class='alert alert-warning' role='alert'>Status: teilscharf</div>")
-            else:
-                self.senddata("<div class='alert alert-success' role='alert'>Status: unscharf</div>")
-            self.senddata("<div class='alert alert-success' role='alert'>Haust&uuml;r: abgeschlossen</div>")
-            self.senddata("<div class='alert alert-success' role='alert'>Kellert&uuml;r: abgeschlossen</div>")
-            self.senddata("<div class='alert alert-success' role='alert'>Gasmelder: OK</div>")
-            self.senddata("<hr>")
-            self.senddata("<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='log'>Logfile<span class='glyphicon glyphicon-triangle-right' aria-hidden='true'></span></button></form>")
-        else:
-            self.senddata("<h2><span class='glyphicon glyphicon-file' aria-hidden='true'></span> Logfile</h2>")
-            self.senddata("<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='main'><span class='glyphicon glyphicon-triangle-left' aria-hidden='true'></span>&Uuml;bersicht</button></form>")
-            self.senddata("<p><pre>")
-            self.senddata(readlog())
-            self.senddata("</pre></p>")
-            self.senddata("<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='main'><span class='glyphicon glyphicon-triangle-left' aria-hidden='true'></span>&Uuml;bersicht</button></form>")
-        self.senddata("</main>")
-        self.senddata("</div>")
-        self.senddata("</body>")
-        self.senddata("</html>")
+        html = generatehtml(logflag)
+        self.senddata(html)
 
     def do_GET2(self):
         self.resp_header()
@@ -131,12 +151,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.resp_page(1)
         else:
             if val.find("arm1=") != -1:
+                log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
                 fkt_armedupdate(1)
             elif val.find("arm2=") != -1:
+                log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
                 fkt_armedupdate(2)
             elif val.find("disarm=") != -1:
+                log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
                 fkt_armedupdate(0)
-            log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
             self.resp_page(0)
 
     def do_POST(self):
