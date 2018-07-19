@@ -15,7 +15,16 @@ fkt_armedstate  = None
 fkt_armedupdate = None
 
 #----------------------------[readlog]
-def readlog():
+def readlog(logflag):
+    if   logflag == 1:
+        compare = "event"
+    elif logflag == 2:
+        compare = "websvr"
+    elif logflag == 3:
+        compare = "main"
+    else:
+        compare = " "
+
     log = ""
     try:
         f = open("/var/log/pid.log","r")
@@ -30,7 +39,8 @@ def readlog():
         if not rl:
             break;
         line = str(rl)
-        log += line.replace('\n', "<br>")
+        if line.find(compare) != -1:
+            log += line.replace('\n', "<br>")
 
     return log
 
@@ -88,14 +98,31 @@ def generatehtml(logflag):
         html += "<div class='alert alert-success' role='alert'>Kellert&uuml;r: abgeschlossen</div>"
         html += "<div class='alert alert-success' role='alert'>Gasmelder: OK</div>"
         html += "<hr>"
-        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='log'>Logfile <i class='fas fa-caret-right'></i></button></form>"
-    else:
-        html += "<h2><i class='fas fa-file'></i> Logfile</h2>"
-        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='main'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
+        html += "Logfiles<br>"
+        html += "<form action='' method='post'>"
+        html += "<div class='btn-group' role='group' aria-label='Basic example'>"
+        html += "<button type='submit' class='btn btn-primary' name='log1'>Event</button>"
+        html += "<button type='submit' class='btn btn-outline-primary' name='log2'>Web</button>"
+        html += "<button type='submit' class='btn btn-primary' name='log3'>Program</button>"
+        html += "<button type='submit' class='btn btn-outline-primary' name='log4'>Gesamt</button>"
+        html += "</div>"
+        html += "</form>"
+
+        #html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='log'>Logfile <i class='fas fa-caret-right'></i></button></form>"
+    elif logflag:
+        if   logflag == 1:
+            html += "<h2><i class='fas fa-tasks'></i> Eventlog</h2>"
+        elif logflag == 2:
+            html += "<h2><i class='fas fa-desktop'></i> Weblog</h2>"
+        elif logflag == 3:
+            html += "<h2><i class='fas fa-file'></i> Mainlog</h2>"
+        else:
+            html += "<h2><i class='fas fa-list-ul'></i> Logfile</h2>"
+        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='mpage'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
         html += "<p><pre>"
-        html += readlog()
+        html += readlog(logflag)
         html += "</pre></p>"
-        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='main'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
+        html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='mpage'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
     html += "</main>"
     html += "</div>"
     html += "</body>"
@@ -124,10 +151,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_GET2(self):
         self.resp_header()
-        if   self.path == "/":
-            self.resp_page(0)
-        elif self.path == "/log":
-            self.resp_page(1)
+        self.resp_page(0)
+        #if   self.path == "/":
+        #    self.resp_page(0)
+        #elif self.path == "/log":
+        #    self.resp_page(1)
 
     def do_GET(self):
         global s_key
@@ -152,18 +180,27 @@ class RequestHandler(BaseHTTPRequestHandler):
         val = str(self.rfile.read(length))
 
         self.resp_header()
-        if val.find ("log=") != -1:
+        if   val.find ("log1=") != -1:
             self.resp_page(1)
+        elif val.find ("log2=") != -1:
+            self.resp_page(2)
+        elif val.find ("log3=") != -1:
+            self.resp_page(3)
+        elif val.find ("log4=") != -1:
+            self.resp_page(4)
+        elif val.find("arm1=") != -1:
+            log.info("event", "armed [{:s}]".format(self.address_string()))
+            fkt_armedupdate(1)
+            self.resp_page(0)
+        elif val.find("arm2=") != -1:
+            log.info("event", "armed2 [{:s}]".format(self.address_string()))
+            fkt_armedupdate(2)
+            self.resp_page(0)
+        elif val.find("disarm=") != -1:
+            log.info("event", "disarmed [{:s}]".format(self.address_string()))
+            fkt_armedupdate(0)
+            self.resp_page(0)
         else:
-            if val.find("arm1=") != -1:
-                log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
-                fkt_armedupdate(1)
-            elif val.find("arm2=") != -1:
-                log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
-                fkt_armedupdate(2)
-            elif val.find("disarm=") != -1:
-                log.info("websvr", "do_POST: {:s} [{:s}]".format(val, self.address_string()))
-                fkt_armedupdate(0)
             self.resp_page(0)
 
     def do_POST(self):

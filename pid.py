@@ -50,12 +50,12 @@ def pir_check():
         s_pircnt = 0
         if s_piralarm == True:
             s_piralarm = False
-            log.info("pir", "reset ({:.0f})".format(time.time() - t_pirlast))
+            log.info("event", "pir reset ({:.0f})".format(time.time() - t_pirlast))
 
     if s_pircnt >= 30:
         if s_piralarm == False:
             s_piralarm = True
-            log.info("pir", "alarm ({:.0f})".format(time.time() - t_pirlast))
+            log.info("event", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
             t_pirlast = time.time()
     return
 
