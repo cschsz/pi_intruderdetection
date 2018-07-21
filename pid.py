@@ -50,12 +50,18 @@ def pir_check():
         s_pircnt = 0
         if s_piralarm == True:
             s_piralarm = False
-            log.info("event", "pir reset ({:.0f})".format(time.time() - t_pirlast))
+            if armedstate():
+                log.info("event", "pir reset ({:.0f})".format(time.time() - t_pirlast))
+            else:
+                log.info("pir", "pir reset ({:.0f})".format(time.time() - t_pirlast))
 
     if s_pircnt >= 30:
         if s_piralarm == False:
             s_piralarm = True
-            log.info("event", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
+            if armedstate():
+                log.info("event", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
+            else:
+                log.info("pir", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
             t_pirlast = time.time()
     return
 
@@ -79,6 +85,7 @@ def alarm_check():
         GPIO.beeper(0)
         GPIO.sirene(0)
         GPIO.ledred(0)
+        s_needrst = False
 
 #----------------------------[status_led]
 def status_led():
