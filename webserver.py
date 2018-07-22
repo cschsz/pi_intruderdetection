@@ -53,10 +53,10 @@ def readlog(logflag):
 
     log = ""
     try:
-        f = open("/var/log/pid.log","r")
+        f = open("/var/log/pid_{:s}.log".format(time.strftime("%Y-%m")),"r")
     except Exception:
         try:
-            f = open("pid.log","r")
+            f = open("pid_{:s}.log".format(time.strftime("%Y-%m")),"r")
         except Exception:
             return "no log found"
 
@@ -67,6 +67,9 @@ def readlog(logflag):
         line = str(rl)
         if line.find(compare) != -1:
             log += line.replace('\n', "<br>")
+
+    if log == "":
+        log = "nothing to display<br>"
 
     return log
 
