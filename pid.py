@@ -6,6 +6,7 @@ import time
 import gpio as GPIO
 import webserver
 import log
+import mail
 
 s_armed = 0
 
@@ -78,7 +79,9 @@ def alarm_check():
                 GPIO.beeper(1)
             s_atoggle = not s_atoggle
             GPIO.ledred(s_atoggle)
-            s_needrst = True
+            if s_needrst == False:
+                s_needrst = True
+                mail.send("ALARM", "PIR ALARM")
         else:
             GPIO.ledred(1)
     else:
@@ -115,6 +118,7 @@ def main():
 if __name__=='__main__':
     try:
         log.info("main", "starting")
+        mail.send("info", "Restarted")
         main()
     except:
         webserver.stop()
