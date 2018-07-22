@@ -14,6 +14,32 @@ fkt_alarmstate  = None
 fkt_armedstate  = None
 fkt_armedupdate = None
 
+FAVICON = b"AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAB\
+            ILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjAA\
+            AATQAAAE0AAABNAAAAOAAAAAAAAAAAAAAAOAAAAE0AAABNAAAATQAAACMAAAAA\
+            AAAAAAAAAAAAAAAAAAAAtAAAAP8AAAD/AAAA/wAAALoAAAAAAAAAAAAAALoAAA\
+            D/AAAA/wAAAP8AAAC0AAAAAAAAAAAAAAAAAAAAAAAAALcAAAD/AAAA/wAAAP8A\
+            AAC6AAAAAAAAAAAAAAC6AAAA/wAAAP8AAAD/AAAAtwAAAAAAAAAAAAAAAAAAAA\
+            AAAAC3AAAA/wAAAP8AAAD/AAAAugAAAAAAAAAAAAAAugAAAP8AAAD/AAAA/wAA\
+            ALcAAAAAAAAAAAAAAAAAAAAAAAAAtwAAAP8AAAD/AAAA/wAAANwAAAB/AAAAfw\
+            AAANwAAAD/AAAA/wAAAP8AAAC3AAAAAAAAAAAAAAAEAAAAAgAAALcAAAD/AAAA\
+            /wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAAtwAAAAIAAAAEAA\
+            AAsAAAAK8AAABbAAAA8wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8AAAD/\
+            AAAA8wAAAFsAAACvAAAAsAAAAIkAAAD+AAAA0AAAAE8AAADfAAAA/wAAAP8AAA\
+            D/AAAA/wAAAP8AAAD/AAAA3wAAAE8AAADQAAAA/gAAAIkAAAAAAAAAXwAAAPgA\
+            AADoAAAAUAAAAMIAAAD/AAAA/wAAAP8AAAD/AAAAwgAAAFEAAADoAAAA+AAAAF\
+            8AAAAAAAAAAAAAAAAAAAA7AAAA6AAAAPcAAABlAAAAmwAAAP8AAAD/AAAAmwAA\
+            AGUAAAD3AAAA/wAAALcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAADRAAAA/g\
+            AAAIkAAABwAAAAcAAAAIkAAAD+AAAA/wAAAP8AAAC3AAAAAAAAAAAAAAAAAAAA\
+            AAAAAAAAAAAAAAAADQAAAK8AAAD/AAAAsQAAALEAAAD/AAAArgAAANwAAAD/AA\
+            AAtwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAhwAAAP4AAAD+\
+            AAAAhwAAAAIAAADSAAAA/wAAALcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
+            AAAAAAAAAAAAAAAABDAAAAQwAAAAAAAAAAAAAASgAAAGAAAABAAAAAAAAAAAAA\
+            AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
+            AAAAAAAAAAAAAAAAAAAAAA//8AAMGDAADBgwAAwYMAAMGDAADAAwAAAAAAAAAA\
+            AAAAAAAAAAAAAMADAADgAwAA8AMAAPgDAAD8IwAA//8AAA=="
+
 #----------------------------[readlog]
 def readlog(logflag):
     if   logflag == 1:
@@ -53,10 +79,9 @@ def generatehtml(logflag):
     html += "<meta name='viewport' content='width=device-width, initial-scale=1'>"
     html += "<title>PId</title>"
     if logflag == 0:
-        html += "<meta http-equiv='refresh' content='5'>"
+        html += "<meta http-equiv='refresh' content='10'>"
     html += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>"
     html += "<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.1.1/css/all.css' integrity='sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ' crossorigin='anonymous'>"
-    #html += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' integrity='sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u' crossorigin='anonymous'>"
     html += "</head>"
     html += "<body>"
     html += "<div class='container'>"
@@ -107,8 +132,6 @@ def generatehtml(logflag):
         html += "<button type='submit' class='btn btn-outline-primary' name='log4'>Gesamt</button>"
         html += "</div>"
         html += "</form>"
-
-        #html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='log'>Logfile <i class='fas fa-caret-right'></i></button></form>"
     elif logflag:
         if   logflag == 1:
             html += "<h2><i class='fas fa-tasks'></i> Eventlog</h2>"
@@ -142,6 +165,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
+    def resp_location(self, path):
+        self.send_response(302)
+        self.send_header('Location', path)
+        self.end_headers()
+
     def senddata(self, data):
         self.wfile.write(bytes(data, "utf-8"))
 
@@ -150,12 +178,23 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.senddata(html)
 
     def do_GET2(self):
-        self.resp_header()
-        self.resp_page(0)
-        #if   self.path == "/":
-        #    self.resp_page(0)
-        #elif self.path == "/log":
-        #    self.resp_page(1)
+        if self.path == "/favicon.ico":
+            self.send_response(200)
+            self.send_header('Content-type', 'image/gif')
+            self.end_headers()
+            self.wfile.write(base64.b64decode(FAVICON))
+        else:
+            self.resp_header()
+            if   self.path == "/log1":
+                self.resp_page(1)
+            elif self.path == "/log2":
+                self.resp_page(2)
+            elif self.path == "/log3":
+                self.resp_page(3)
+            elif self.path == "/log4":
+                self.resp_page(4)
+            else:
+                self.resp_page(0)
 
     def do_GET(self):
         global s_key
@@ -179,29 +218,28 @@ class RequestHandler(BaseHTTPRequestHandler):
         length = int(content_length[0]) if content_length else 0
         val = str(self.rfile.read(length))
 
-        self.resp_header()
         if   val.find ("log1=") != -1:
-            self.resp_page(1)
+            self.resp_location("log1")
         elif val.find ("log2=") != -1:
-            self.resp_page(2)
+            self.resp_location("log2")
         elif val.find ("log3=") != -1:
-            self.resp_page(3)
+            self.resp_location("log3")
         elif val.find ("log4=") != -1:
-            self.resp_page(4)
+            self.resp_location("log4")
         elif val.find("arm1=") != -1:
             log.info("event", "armed [{:s}]".format(self.address_string()))
             fkt_armedupdate(1)
-            self.resp_page(0)
+            self.resp_location("/")
         elif val.find("arm2=") != -1:
             log.info("event", "armed2 [{:s}]".format(self.address_string()))
             fkt_armedupdate(2)
-            self.resp_page(0)
+            self.resp_location("/")
         elif val.find("disarm=") != -1:
             log.info("event", "disarmed [{:s}]".format(self.address_string()))
             fkt_armedupdate(0)
-            self.resp_page(0)
+            self.resp_location("/")
         else:
-            self.resp_page(0)
+            self.resp_location("/")
 
     def do_POST(self):
         global s_key

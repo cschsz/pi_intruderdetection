@@ -3,7 +3,7 @@ PIR intruder detection with alarm sound and app control on raspberry pi
 
 Key features of this project are:
 * PIR
-* Sirene
+* Siren
 * 433 MHz
 * Android app or web access
 
@@ -39,7 +39,7 @@ http://rpi.science.uoit.ca/lab/gpio/
 3V3 3   5   7   GND 11  13  15  3V3 19  21  23  GND 27  29  31  33  35  37  GND
 |           |   |   |                                                   |   |
 +--------+  |   |   |                                                  1k0  ^
-         |  |   |   SIR                                                LED  |
+         |  |   |   SIREN                                              LED  |
          P1 P4 P2                                                     green ^
           433 MHz                                                       |   |
                                                                         +->-+
