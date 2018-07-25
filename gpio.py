@@ -52,9 +52,9 @@ except ImportError:
         return
 
 pin_pir = 8
-pin_sir = 11
+pin_sir = 12
 pin_red = 36
-pin_grn = 37
+pin_grn = 32
 pin_bee = 11
 
 #----------------------------[sirene]

@@ -20,7 +20,7 @@ def rfthread():
 
     if imp == True:
         log.info("rf", "init")
-        rfdevice = RFDevice(13)
+        rfdevice = RFDevice(18)
         rfdevice.enable_rx()
         timestamp = None
         log.info("rf", "started")
