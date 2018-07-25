@@ -7,6 +7,7 @@ import gpio as GPIO
 import webserver
 import log
 import mail
+import rf
 
 s_armed = 0
 
@@ -19,6 +20,8 @@ t_pirlast = time.time()
 s_atoggle = True
 s_stoggle = True
 s_scnt = 0
+s_rfcode = ""
+s_rflcode = ""
 
 #----------------------------[alarmstate]
 def alarmstate():
@@ -37,6 +40,22 @@ def armedstate():
 def armedupdate(val):
     global s_armed
     s_armed = val
+    return
+
+#----------------------------[rfupdate]
+def rfupdate(code):
+    global s_rfcode
+    global s_rflcode
+
+    s_rfcode = code
+    if s_rflcode != s_rfcode:
+        s_rflcode = s_rfcode
+        if   s_rfcode == "86356":
+            log.info("event", "armed by " + code)
+            armedupdate(2)
+        elif s_rfcode == "86353":
+            log.info("event", "disarmed by " + code)
+            armedupdate(0)
     return
 
 #----------------------------[pir_check]
@@ -105,6 +124,7 @@ def status_led():
 def main():
     # init
     GPIO.init()
+    rf.start(rfupdate)
     webserver.start(alarmstate, armedstate, armedupdate)
 
     # running
@@ -122,5 +142,7 @@ if __name__=='__main__':
         main()
     except:
         webserver.stop()
+        rf.stop()
+        time.sleep(0.5)
         GPIO.cleanup()
         log.info("main", "exit")
