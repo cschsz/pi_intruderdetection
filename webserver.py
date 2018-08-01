@@ -191,16 +191,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(base64.b64decode(FAVICON))
         else:
             self.resp_header()
-            if   self.path == "/log1":
-                self.resp_page(1)
-            elif self.path == "/log2":
-                self.resp_page(2)
-            elif self.path == "/log3":
-                self.resp_page(3)
-            elif self.path == "/log4":
-                self.resp_page(4)
-            elif self.path == "/log5":
-                self.resp_page(5)
+            path = str(self.path)
+            if path[:4] == "/log" and len(path) >= 5:
+                self.resp_page(int(path[4]))
             else:
                 self.resp_page(0)
 
@@ -226,30 +219,22 @@ class RequestHandler(BaseHTTPRequestHandler):
         length = int(content_length[0]) if content_length else 0
         val = str(self.rfile.read(length))
 
-        if   val.find ("log1=") != -1:
-            self.resp_location("log1")
-        elif val.find ("log2=") != -1:
-            self.resp_location("log2")
-        elif val.find ("log3=") != -1:
-            self.resp_location("log3")
-        elif val.find ("log4=") != -1:
-            self.resp_location("log4")
-        elif val.find ("log5=") != -1:
-            self.resp_location("log5")
+        pos = val.find("log")
+        if   pos != -1:
+            if pos + 4 < len(val):
+                log.info("websvr", "get {:s} [{:s}]".format(val, self.address_string()))
+                self.resp_location(val[pos:pos+4])
+                return
         elif val.find("arm1=") != -1:
             log.info("event", "armed [{:s}]".format(self.address_string()))
             fkt_armedupdate(1)
-            self.resp_location("/")
         elif val.find("arm2=") != -1:
             log.info("event", "armed2 [{:s}]".format(self.address_string()))
             fkt_armedupdate(2)
-            self.resp_location("/")
         elif val.find("disarm=") != -1:
             log.info("event", "disarmed [{:s}]".format(self.address_string()))
             fkt_armedupdate(0)
-            self.resp_location("/")
-        else:
-            self.resp_location("/")
+        self.resp_location("/")
 
     def do_POST(self):
         global s_key
