@@ -75,7 +75,7 @@ def pir_check():
             else:
                 log.info("pir", "pir reset ({:.0f})".format(time.time() - t_pirlast))
 
-    if s_pircnt >= 30:
+    if s_pircnt >= 45:
         if s_piralarm == False:
             s_piralarm = True
             if armedstate():
