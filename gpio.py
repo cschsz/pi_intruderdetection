@@ -57,8 +57,8 @@ pin_red = 36
 pin_grn = 32
 pin_bee = 11
 
-#----------------------------[sirene]
-def sirene(value):
+#----------------------------[siren]
+def siren(value):
     if value == 1:
         output(pin_sir, HIGH)
     else:
@@ -106,7 +106,7 @@ def init():
     setup(pin_grn, OUT)
     setup(pin_bee, OUT)
 
-    sirene(0)
+    siren(0)
     beeper(0)
     ledred(0)
     ledgrn(0)
@@ -119,7 +119,7 @@ if __name__=='__main__':
         init()
         while True:
             print(pir())
-            sirene(val)
+            siren(val)
             if val == 1:
                 val = 0
             else:

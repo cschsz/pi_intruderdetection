@@ -93,7 +93,7 @@ def alarm_check():
     if armedstate():
         if s_pirdetection == True:
             if armedstate() == 1:
-                GPIO.sirene(1)
+                GPIO.siren(1)
             else:
                 GPIO.beeper(1)
             s_atoggle = not s_atoggle
@@ -105,7 +105,7 @@ def alarm_check():
             GPIO.ledred(1)
     else:
         GPIO.beeper(0)
-        GPIO.sirene(0)
+        GPIO.siren(0)
         GPIO.ledred(0)
         s_needrst = False
 
@@ -130,7 +130,7 @@ def main():
     # init
     GPIO.init()
     rf.start(rfupdate)
-    webserver.start(alarmstate, armedstate, armedupdate)
+    webserver.start(alarmstate, armedstate, armedupdate, GPIO.siren, GPIO.beeper)
 
     # running
     while True:

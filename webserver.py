@@ -13,6 +13,8 @@ s_key  = ""
 fkt_alarmstate  = None
 fkt_armedstate  = None
 fkt_armedupdate = None
+fkt_siren       = None
+fkt_beeper      = None
 
 FAVICON = b"AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAB\
             ILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
@@ -141,6 +143,14 @@ def generatehtml(logflag):
         html += "<button type='submit' class='btn btn-outline-primary' name='log6'>ALL</button>"
         html += "</div>"
         html += "</form>"
+        html += "<hr>"
+        html += "Tests<br>"
+        html += "<form action='' method='post'>"
+        html += "<div class='btn-group' role='group' aria-label='Basic example'>"
+        html += "<button type='submit' class='btn btn-secondary' name='test1'>Sirene</button>"
+        html += "<button type='submit' class='btn btn-outline-secondary' name='test2'>Beeper</button>"
+        html += "</div>"
+        html += "</form>"
     elif logflag:
         html += "<h2><i class='fas fa-file'></i> Logfile</h2>"
         html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='mpage'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
@@ -252,6 +262,16 @@ class RequestHandler(BaseHTTPRequestHandler):
             elif val.find("disarm=") != -1:
                 log.info("event", "disarmed [{:s}]".format(self.address_string()))
                 fkt_armedupdate(0)
+            elif val.find("test1=") != -1:
+                log.info("event", "test siren [{:s}]".format(self.address_string()))
+                fkt_siren(1)
+                time.sleep(1)
+                fkt_siren(0)
+            elif val.find("test2=") != -1:
+                log.info("event", "test beeper [{:s}]".format(self.address_string()))
+                fkt_beeper(1)
+                time.sleep(1)
+                fkt_beeper(0)
             self.resp_location("/")
         except Exception as e:
             log.info("websvr", "exception! (do_POST2) {:s} [{:s}]".format(str(e), self.address_string()))
@@ -339,14 +359,18 @@ def stop():
     return
 
 #----------------------------[start]
-def start(falarmstate, farmedstate, farmedupdate):
+def start(falarmstate, farmedstate, farmedupdate, fktsiren, fktbeeper):
     global fkt_alarmstate
     global fkt_armedstate
     global fkt_armedupdate
+    global fkt_siren
+    global fkt_beeper
 
-    fkt_alarmstate = falarmstate
-    fkt_armedstate = farmedstate
+    fkt_alarmstate  = falarmstate
+    fkt_armedstate  = farmedstate
     fkt_armedupdate = farmedupdate
+    fkt_siren       = fktsiren
+    fkt_beeper      = fktbeeper
 
     thread = threading.Thread(target=serverthread, args=[])
     thread.start()
