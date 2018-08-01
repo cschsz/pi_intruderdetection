@@ -50,6 +50,8 @@ def readlog(logflag):
         compare = "main"
     elif logflag == 4:
         compare = "rf"
+    elif logflag == 5:
+        compare = "pir"
     else:
         compare = " "
 
@@ -135,18 +137,12 @@ def generatehtml(logflag):
         html += "<button type='submit' class='btn btn-outline-primary' name='log2'>WEB</button>"
         html += "<button type='submit' class='btn btn-primary' name='log3'>PRG</button>"
         html += "<button type='submit' class='btn btn-outline-primary' name='log4'>433</button>"
-        html += "<button type='submit' class='btn btn-primary' name='log5'>ALL</button>"
+        html += "<button type='submit' class='btn btn-primary' name='log5'>PIR</button>"
+        html += "<button type='submit' class='btn btn-outline-primary' name='log6'>ALL</button>"
         html += "</div>"
         html += "</form>"
     elif logflag:
-        if   logflag == 1:
-            html += "<h2><i class='fas fa-tasks'></i> Eventlog</h2>"
-        elif logflag == 2:
-            html += "<h2><i class='fas fa-desktop'></i> Weblog</h2>"
-        elif logflag == 3:
-            html += "<h2><i class='fas fa-file'></i> Mainlog</h2>"
-        else:
-            html += "<h2><i class='fas fa-list-ul'></i> Logfile</h2>"
+        html += "<h2><i class='fas fa-file'></i> Logfile</h2>"
         html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='mpage'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
         html += "<p><pre>"
         html += readlog(logflag)
