@@ -157,97 +157,124 @@ def generatehtml(logflag):
 #----------------------------[RequestHandler]
 class RequestHandler(BaseHTTPRequestHandler):
     def resp_header(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
+        try:
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+        except Exception as e:
+            log.info("websvr", "exception! (resp_header) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def resp_auth(self):
-        self.send_response(401)
-        self.send_header('WWW-Authenticate', 'Basic realm=\"Test\"')
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
+        try:
+            self.send_response(401)
+            self.send_header('WWW-Authenticate', 'Basic realm=\"Test\"')
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+        except Exception as e:
+            log.info("websvr", "exception! (resp_auth) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def resp_location(self, path):
-        self.send_response(302)
-        self.send_header('Location', path)
-        self.end_headers()
+        try:
+            self.send_response(302)
+            self.send_header('Location', path)
+            self.end_headers()
+        except Exception as e:
+            log.info("websvr", "exception! (resp_location) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def senddata(self, data):
-        self.wfile.write(bytes(data, "utf-8"))
+        try:
+            self.wfile.write(bytes(data, "utf-8"))
+        except Exception as e:
+            log.info("websvr", "exception! (senddata) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def resp_page(self, logflag):
-        html = generatehtml(logflag)
-        self.senddata(html)
+        try:
+            html = generatehtml(logflag)
+            self.senddata(html)
+        except Exception as e:
+            log.info("websvr", "exception! (resp_page) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def do_GET2(self):
-        if self.path == "/favicon.ico":
-            self.send_response(200)
-            self.send_header('Content-type', 'image/gif')
-            self.end_headers()
-            self.wfile.write(base64.b64decode(FAVICON))
-        else:
-            self.resp_header()
-            path = str(self.path)
-            if path[:4] == "/log" and len(path) >= 5:
-                self.resp_page(int(path[4]))
+        try:
+            if self.path == "/favicon.ico":
+                self.send_response(200)
+                self.send_header('Content-type', 'image/gif')
+                self.end_headers()
+                self.wfile.write(base64.b64decode(FAVICON))
             else:
-                self.resp_page(0)
+                self.resp_header()
+                path = str(self.path)
+                if path[:4] == "/log" and len(path) >= 5:
+                    self.resp_page(int(path[4]))
+                else:
+                    self.resp_page(0)
+        except Exception as e:
+            log.info("websvr", "exception! (do_GET2) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def do_GET(self):
         global s_key
-        if s_key == "":
-            self.do_GET2()
-        else:
-            if self.headers.get('Authorization') == None:
-                self.resp_auth()
-                self.senddata("no auth header received")
-                pass
-            elif self.headers.get('Authorization') == "Basic "+s_key:
+        try:
+            if s_key == "":
                 self.do_GET2()
-                pass
             else:
-                self.resp_auth()
-                self.senddata("not authenticated")
-                pass
+                if self.headers.get('Authorization') == None:
+                    self.resp_auth()
+                    self.senddata("no auth header received")
+                    pass
+                elif self.headers.get('Authorization') == "Basic "+s_key:
+                    self.do_GET2()
+                    pass
+                else:
+                    self.resp_auth()
+                    self.senddata("not authenticated")
+                    pass
+        except Exception as e:
+            log.info("websvr", "exception! (do_GET) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def do_POST2(self):
-        content_length = self.headers.get('content-length')
-        length = int(content_length[0]) if content_length else 0
-        val = str(self.rfile.read(length))
+        try:
+            content_length = self.headers.get('content-length')
+            length = int(content_length[0]) if content_length else 0
+            val = str(self.rfile.read(length))
 
-        pos = val.find("log")
-        if   pos != -1:
-            if pos + 4 < len(val):
-                log.info("websvr", "get {:s} [{:s}]".format(val, self.address_string()))
-                self.resp_location(val[pos:pos+4])
-                return
-        elif val.find("arm1=") != -1:
-            log.info("event", "armed [{:s}]".format(self.address_string()))
-            fkt_armedupdate(1)
-        elif val.find("arm2=") != -1:
-            log.info("event", "armed2 [{:s}]".format(self.address_string()))
-            fkt_armedupdate(2)
-        elif val.find("disarm=") != -1:
-            log.info("event", "disarmed [{:s}]".format(self.address_string()))
-            fkt_armedupdate(0)
-        self.resp_location("/")
+            pos = val.find("log")
+            if   pos != -1:
+                if pos + 4 < len(val):
+                    log.info("websvr", "get {:s} [{:s}]".format(val, self.address_string()))
+                    self.resp_location(val[pos:pos+4])
+                    return
+            elif val.find("arm1=") != -1:
+                log.info("event", "armed [{:s}]".format(self.address_string()))
+                fkt_armedupdate(1)
+            elif val.find("arm2=") != -1:
+                log.info("event", "armed2 [{:s}]".format(self.address_string()))
+                fkt_armedupdate(2)
+            elif val.find("disarm=") != -1:
+                log.info("event", "disarmed [{:s}]".format(self.address_string()))
+                fkt_armedupdate(0)
+            self.resp_location("/")
+        except Exception as e:
+            log.info("websvr", "exception! (do_POST2) {:s} [{:s}]".format(str(e), self.address_string()))
 
     def do_POST(self):
         global s_key
-        if s_key == "":
-            self.do_POST2()
-        else:
-            if self.headers.get('Authorization') == None:
-                self.resp_auth()
-                self.senddata("no auth header received")
-                pass
-            elif self.headers.get('Authorization') == "Basic "+s_key:
+        try:
+            if s_key == "":
                 self.do_POST2()
-                pass
             else:
-                self.resp_auth()
-                self.senddata("not authenticated")
-                pass
+                if self.headers.get('Authorization') == None:
+                    self.resp_auth()
+                    self.senddata("no auth header received")
+                    pass
+                elif self.headers.get('Authorization') == "Basic "+s_key:
+                    self.do_POST2()
+                    pass
+                else:
+                    self.resp_auth()
+                    self.senddata("not authenticated")
+                    pass
+        except Exception as e:
+            log.info("websvr", "exception! (do_POST) {:s} [{:s}]".format(str(e), self.address_string()))
 
 #----------------------------[serverthread]
 def serverthread():
