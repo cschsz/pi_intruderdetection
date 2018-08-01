@@ -48,6 +48,8 @@ def readlog(logflag):
         compare = "websvr"
     elif logflag == 3:
         compare = "main"
+    elif logflag == 4:
+        compare = "rf"
     else:
         compare = " "
 
@@ -129,10 +131,11 @@ def generatehtml(logflag):
         html += "Logfiles<br>"
         html += "<form action='' method='post'>"
         html += "<div class='btn-group' role='group' aria-label='Basic example'>"
-        html += "<button type='submit' class='btn btn-primary' name='log1'>Event</button>"
-        html += "<button type='submit' class='btn btn-outline-primary' name='log2'>Web</button>"
-        html += "<button type='submit' class='btn btn-primary' name='log3'>Program</button>"
-        html += "<button type='submit' class='btn btn-outline-primary' name='log4'>Gesamt</button>"
+        html += "<button type='submit' class='btn btn-primary' name='log1'>EVT</button>"
+        html += "<button type='submit' class='btn btn-outline-primary' name='log2'>WEB</button>"
+        html += "<button type='submit' class='btn btn-primary' name='log3'>PRG</button>"
+        html += "<button type='submit' class='btn btn-outline-primary' name='log4'>433</button>"
+        html += "<button type='submit' class='btn btn-primary' name='log5'>ALL</button>"
         html += "</div>"
         html += "</form>"
     elif logflag:
@@ -196,6 +199,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.resp_page(3)
             elif self.path == "/log4":
                 self.resp_page(4)
+            elif self.path == "/log5":
+                self.resp_page(5)
             else:
                 self.resp_page(0)
 
@@ -229,6 +234,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.resp_location("log3")
         elif val.find ("log4=") != -1:
             self.resp_location("log4")
+        elif val.find ("log5=") != -1:
+            self.resp_location("log5")
         elif val.find("arm1=") != -1:
             log.info("event", "armed [{:s}]".format(self.address_string()))
             fkt_armedupdate(1)
