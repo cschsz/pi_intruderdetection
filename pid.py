@@ -14,7 +14,7 @@ s_armed = 0
 s_galarm = False
 t_ga = time.time()
 s_needrst = False
-s_piralarm = False
+s_pirdetection = False
 s_pircnt  = 0
 t_pirlast = time.time()
 s_atoggle = True
@@ -27,7 +27,7 @@ s_rflcode = ""
 def alarmstate():
     if   s_needrst:
         return -1
-    elif s_piralarm:
+    elif s_pirdetection:
         return 1
     else:
         return 0
@@ -60,7 +60,7 @@ def rfupdate(code):
 
 #----------------------------[pir_check]
 def pir_check():
-    global s_piralarm
+    global s_pirdetection
     global s_pircnt
     global t_pirlast
 
@@ -68,16 +68,16 @@ def pir_check():
         s_pircnt += 1
     else:
         s_pircnt = 0
-        if s_piralarm == True:
-            s_piralarm = False
+        if s_pirdetection == True:
+            s_pirdetection = False
             if armedstate():
                 log.info("event", "pir reset ({:.0f})".format(time.time() - t_pirlast))
             else:
                 log.info("pir", "pir reset ({:.0f})".format(time.time() - t_pirlast))
 
     if s_pircnt >= 45:
-        if s_piralarm == False:
-            s_piralarm = True
+        if s_pirdetection == False:
+            s_pirdetection = True
             if armedstate():
                 log.info("event", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
             else:
@@ -91,7 +91,7 @@ def alarm_check():
     global s_needrst
 
     if armedstate():
-        if s_piralarm == True:
+        if s_pirdetection == True:
             if armedstate() == 1:
                 GPIO.sirene(1)
             else:
@@ -114,8 +114,13 @@ def status_led():
     global s_stoggle
     global s_scnt
 
+    if s_pirdetection == True:
+        val = 2
+    else:
+        val = 10
+
     s_scnt += 1
-    if s_scnt >= 10:
+    if s_scnt >= val:
         s_scnt = 0
         s_stoggle = not s_stoggle
         GPIO.ledgrn(s_stoggle)
