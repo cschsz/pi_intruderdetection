@@ -166,6 +166,12 @@ def generatehtml(logflag):
 
 #----------------------------[RequestHandler]
 class RequestHandler(BaseHTTPRequestHandler):
+    buffer = 1
+    try:
+        log_file = open('/var/log/pid_websvr.log', 'w', buffer)
+    except Exception:
+        log_file = open('pid_websvr.log', 'w', buffer)
+
     def resp_header(self):
         try:
             self.send_response(200)
@@ -295,6 +301,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                     pass
         except Exception as e:
             log.info("websvr", "exception! (do_POST) {:s} [{:s}]".format(str(e), self.address_string()))
+
+    def log_message(self, format, *args):
+        self.log_file.write("%s - - [%s] %s\n" %
+                            (self.client_address[0],
+                             self.log_date_time_string(),
+                             format%args))
 
 #----------------------------[serverthread]
 def serverthread():
