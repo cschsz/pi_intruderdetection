@@ -166,147 +166,129 @@ def generatehtml(logflag):
 
 #----------------------------[RequestHandler]
 class RequestHandler(BaseHTTPRequestHandler):
-    buffer = 1
-    try:
-        log_file = open('/var/log/pid_websvr.log', 'w', buffer)
-    except Exception:
-        log_file = open('pid_websvr.log', 'w', buffer)
-
     def resp_header(self):
-        try:
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-        except Exception as e:
-            log.info("websvr", "exception! (resp_header) {:s} [{:s}]".format(str(e), self.address_string()))
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_header_1")
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_header_2")
 
     def resp_auth(self):
-        try:
-            self.send_response(401)
-            self.send_header('WWW-Authenticate', 'Basic realm=\"Test\"')
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-        except Exception as e:
-            log.info("websvr", "exception! (resp_auth) {:s} [{:s}]".format(str(e), self.address_string()))
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_auth_1")
+        self.send_response(401)
+        self.send_header('WWW-Authenticate', 'Basic realm=\"Test\"')
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_auth_2")
 
     def resp_location(self, path):
-        try:
-            self.send_response(302)
-            self.send_header('Location', path)
-            self.end_headers()
-        except Exception as e:
-            log.info("websvr", "exception! (resp_location) {:s} [{:s}]".format(str(e), self.address_string()))
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_location_1")
+        self.send_response(302)
+        self.send_header('Location', path)
+        self.end_headers()
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_location_2")
 
     def senddata(self, data):
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] senddata_1")
         try:
             self.wfile.write(bytes(data, "utf-8"))
         except Exception as e:
             log.info("websvr", "exception! (senddata) {:s} [{:s}]".format(str(e), self.address_string()))
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] senddata_2")
 
     def resp_page(self, logflag):
-        try:
-            html = generatehtml(logflag)
-            self.senddata(html)
-        except Exception as e:
-            log.info("websvr", "exception! (resp_page) {:s} [{:s}]".format(str(e), self.address_string()))
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_page_1")
+        html = generatehtml(logflag)
+        self.senddata(html)
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_page_2")
 
     def do_GET2(self):
-        try:
-            if self.path == "/favicon.ico":
-                self.send_response(200)
-                self.send_header('Content-type', 'image/gif')
-                self.end_headers()
-                self.wfile.write(base64.b64decode(FAVICON))
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET2_1")
+        if self.path == "/favicon.ico":
+            self.send_response(200)
+            self.send_header('Content-type', 'image/gif')
+            self.end_headers()
+            self.wfile.write(base64.b64decode(FAVICON))
+        else:
+            self.resp_header()
+            path = str(self.path)
+            if path[:4] == "/log" and len(path) >= 5:
+                self.resp_page(int(path[4]))
             else:
-                self.resp_header()
-                path = str(self.path)
-                if path[:4] == "/log" and len(path) >= 5:
-                    self.resp_page(int(path[4]))
-                else:
-                    self.resp_page(0)
-        except Exception as e:
-            log.info("websvr", "exception! (do_GET2) {:s} [{:s}]".format(str(e), self.address_string()))
+                self.resp_page(0)
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET2_2")
 
     def do_GET(self):
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET_1")
         global s_key
-        try:
-            if s_key == "":
+        if s_key == "":
+            self.do_GET2()
+        else:
+            if self.headers.get('Authorization') == None:
+                self.resp_auth()
+                self.senddata("no auth header received")
+                pass
+            elif self.headers.get('Authorization') == "Basic "+s_key:
                 self.do_GET2()
+                pass
             else:
-                if self.headers.get('Authorization') == None:
-                    self.resp_auth()
-                    self.senddata("no auth header received")
-                    pass
-                elif self.headers.get('Authorization') == "Basic "+s_key:
-                    self.do_GET2()
-                    pass
-                else:
-                    self.resp_auth()
-                    self.senddata("not authenticated")
-                    pass
-        except Exception as e:
-            log.info("websvr", "exception! (do_GET) {:s} [{:s}]".format(str(e), self.address_string()))
+                self.resp_auth()
+                self.senddata("not authenticated")
+                pass
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET_2")
 
     def do_POST2(self):
-        try:
-            content_length = self.headers.get('content-length')
-            length = int(content_length[0]) if content_length else 0
-            val = str(self.rfile.read(length))
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST2_1")
+        content_length = self.headers.get('content-length')
+        length = int(content_length[0]) if content_length else 0
+        val = str(self.rfile.read(length))
 
-            pos = val.find("log")
-            if   pos != -1:
-                if pos + 4 < len(val):
-                    log.info("websvr", "get {:s} [{:s}]".format(val, self.address_string()))
-                    self.resp_location(val[pos:pos+4])
-                    return
-            elif val.find("arm1=") != -1:
-                log.info("event", "armed [{:s}]".format(self.address_string()))
-                fkt_armedupdate(1)
-            elif val.find("arm2=") != -1:
-                log.info("event", "armed2 [{:s}]".format(self.address_string()))
-                fkt_armedupdate(2)
-            elif val.find("disarm=") != -1:
-                log.info("event", "disarmed [{:s}]".format(self.address_string()))
-                fkt_armedupdate(0)
-            elif val.find("test1=") != -1:
-                log.info("event", "test siren [{:s}]".format(self.address_string()))
-                fkt_siren(1)
-                time.sleep(1)
-                fkt_siren(0)
-            elif val.find("test2=") != -1:
-                log.info("event", "test beeper [{:s}]".format(self.address_string()))
-                fkt_beeper(1)
-                time.sleep(1)
-                fkt_beeper(0)
-            self.resp_location("/")
-        except Exception as e:
-            log.info("websvr", "exception! (do_POST2) {:s} [{:s}]".format(str(e), self.address_string()))
+        pos = val.find("log")
+        if   pos != -1:
+            if pos + 4 < len(val):
+                log.info("websvr", "get {:s} [{:s}]".format(val, self.address_string()))
+                self.resp_location(val[pos:pos+4])
+                return
+        elif val.find("arm1=") != -1:
+            log.info("event", "armed [{:s}]".format(self.address_string()))
+            fkt_armedupdate(1)
+        elif val.find("arm2=") != -1:
+            log.info("event", "armed2 [{:s}]".format(self.address_string()))
+            fkt_armedupdate(2)
+        elif val.find("disarm=") != -1:
+            log.info("event", "disarmed [{:s}]".format(self.address_string()))
+            fkt_armedupdate(0)
+        elif val.find("test1=") != -1:
+            log.info("event", "test siren [{:s}]".format(self.address_string()))
+            fkt_siren(1)
+            time.sleep(1)
+            fkt_siren(0)
+        elif val.find("test2=") != -1:
+            log.info("event", "test beeper [{:s}]".format(self.address_string()))
+            fkt_beeper(1)
+            time.sleep(1)
+            fkt_beeper(0)
+        self.resp_location("/")
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST2_1")
 
     def do_POST(self):
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST_1")
         global s_key
-        try:
-            if s_key == "":
+        if s_key == "":
+            self.do_POST2()
+        else:
+            if self.headers.get('Authorization') == None:
+                self.resp_auth()
+                self.senddata("no auth header received")
+                pass
+            elif self.headers.get('Authorization') == "Basic "+s_key:
                 self.do_POST2()
+                pass
             else:
-                if self.headers.get('Authorization') == None:
-                    self.resp_auth()
-                    self.senddata("no auth header received")
-                    pass
-                elif self.headers.get('Authorization') == "Basic "+s_key:
-                    self.do_POST2()
-                    pass
-                else:
-                    self.resp_auth()
-                    self.senddata("not authenticated")
-                    pass
-        except Exception as e:
-            log.info("websvr", "exception! (do_POST) {:s} [{:s}]".format(str(e), self.address_string()))
-
-    def log_message(self, format, *args):
-        self.log_file.write("%s - - [%s] %s\n" %
-                            (self.client_address[0],
-                             self.log_date_time_string(),
-                             format%args))
+                self.resp_auth()
+                self.senddata("not authenticated")
+                pass
+        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST_2")
 
 #----------------------------[serverthread]
 def serverthread():
