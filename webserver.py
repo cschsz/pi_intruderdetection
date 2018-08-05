@@ -99,6 +99,12 @@ def generatehtml(logflag):
         html += "<h2><i class='fas fa-home'></i> PId</h2>"
         html += "<p>{:s}</p>".format(time.strftime("%d.%m.%Y %H:%M:%S",time.localtime()))
         html += "<hr>"
+        if   fkt_armedstate() == 1:
+            html += "Status: scharf <i class='fas fa-lock'></i>"
+        elif fkt_armedstate() == 2:
+            html += "Status: teilscharf <i class='fas fa-user-lock'></i>"
+        else:
+            html += "Status: unscharf <i class='fas fa-lock-open'></i>"
         html += "<form action='' method='post'>"
         if fkt_armedstate() == 0:
             html += "<button type='submit' class='btn btn-danger btn-lg' name='arm1'>"
@@ -122,17 +128,13 @@ def generatehtml(logflag):
             html += "</button>"
         html += "</form>"
         html += "<hr>"
-        if   fkt_armedstate() == 1:
-            html += "<div class='alert alert-danger' role='alert'>Status: scharf <i class='fas fa-lock'></i></div>"
-        elif fkt_armedstate() == 2:
-            html += "<div class='alert alert-warning' role='alert'>Status: teilscharf <i class='fas fa-user-lock'></i></div>"
-        else:
-            html += "<div class='alert alert-success' role='alert'>Status: unscharf <i class='fas fa-lock-open'></i></div>"
-        html += "<div class='alert alert-success' role='alert'>Haust&uuml;r: abgeschlossen</div>"
-        html += "<div class='alert alert-success' role='alert'>Kellert&uuml;r: abgeschlossen</div>"
-        html += "<div class='alert alert-success' role='alert'>Gasmelder: OK</div>"
+        html += "Sensoren<br>"
+        html += "<div class='alert alert-warning' role='alert'>Haust&uuml;r: ?</div>"
+        html += "<div class='alert alert-warning' role='alert'>Kellert&uuml;r: ?</div>"
+        html += "<div class='alert alert-warning' role='alert'>Klingel: ?</div>"
+        html += "<div class='alert alert-warning' role='alert'>Gasmelder: ?</div>"
         html += "<hr>"
-        html += "Logfiles<br>"
+        html += "Protokolldateien<br>"
         html += "<form action='' method='post'>"
         html += "<div class='btn-group' role='group' aria-label='Basic example'>"
         html += "<button type='submit' class='btn btn-primary' name='log1'>EVT</button>"
@@ -144,7 +146,7 @@ def generatehtml(logflag):
         html += "</div>"
         html += "</form>"
         html += "<hr>"
-        html += "Tests<br>"
+        html += "Funktionstests<br>"
         html += "<form action='' method='post'>"
         html += "<div class='btn-group' role='group' aria-label='Basic example'>"
         html += "<button type='submit' class='btn btn-secondary' name='test1'>Sirene</button>"
@@ -152,7 +154,7 @@ def generatehtml(logflag):
         html += "</div>"
         html += "</form>"
     elif logflag:
-        html += "<h2><i class='fas fa-file'></i> Logfile</h2>"
+        html += "<h2><i class='fas fa-file'></i> Protokolldatei</h2>"
         html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='mpage'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
         html += "<p><pre>"
         html += readlog(logflag)
