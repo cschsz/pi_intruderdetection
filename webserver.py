@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
 import configparser
 import log
 import threading
@@ -169,43 +170,32 @@ def generatehtml(logflag):
 #----------------------------[RequestHandler]
 class RequestHandler(BaseHTTPRequestHandler):
     def resp_header(self):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_header_1")
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_header_2")
 
     def resp_auth(self):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_auth_1")
         self.send_response(401)
         self.send_header('WWW-Authenticate', 'Basic realm=\"Test\"')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_auth_2")
 
     def resp_location(self, path):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_location_1")
         self.send_response(302)
         self.send_header('Location', path)
         self.end_headers()
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_location_2")
 
     def senddata(self, data):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] senddata_1")
         try:
             self.wfile.write(bytes(data, "utf-8"))
         except Exception as e:
             log.info("websvr", "exception! (senddata) {:s} [{:s}]".format(str(e), self.address_string()))
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] senddata_2")
 
     def resp_page(self, logflag):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_page_1")
         html = generatehtml(logflag)
         self.senddata(html)
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] resp_page_2")
 
     def do_GET2(self):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET2_1")
         if self.path == "/favicon.ico":
             self.send_response(200)
             self.send_header('Content-type', 'image/gif')
@@ -218,10 +208,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.resp_page(int(path[4]))
             else:
                 self.resp_page(0)
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET2_2")
 
     def do_GET(self):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET_1")
         global s_key
         if s_key == "":
             self.do_GET2()
@@ -237,10 +225,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.resp_auth()
                 self.senddata("not authenticated")
                 pass
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_GET_2")
 
     def do_POST2(self):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST2_1")
         content_length = self.headers.get('content-length')
         length = int(content_length[0]) if content_length else 0
         val = str(self.rfile.read(length))
@@ -271,10 +257,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             time.sleep(1)
             fkt_beeper(0)
         self.resp_location("/")
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST2_1")
 
     def do_POST(self):
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST_1")
         global s_key
         if s_key == "":
             self.do_POST2()
@@ -290,7 +274,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.resp_auth()
                 self.senddata("not authenticated")
                 pass
-        print(time.strftime("%Y-%m-%d %H:%M:%S") + ": [websvr] do_POST_2")
+
+#----------------------------[serverthread]
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """ This class allows to handle requests in separated threads.
+        No further content needed, don't touch this. """
 
 #----------------------------[serverthread]
 def serverthread():
@@ -320,7 +308,7 @@ def serverthread():
     # start
     while True:
         try:
-            s_hsvr = HTTPServer(("", 4711), RequestHandler)
+            s_hsvr = ThreadedHTTPServer(("", 4711), RequestHandler)
         except Exception:
             time.sleep(1)
 
