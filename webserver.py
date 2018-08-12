@@ -3,6 +3,7 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 import configparser
+import datetime
 import log
 import threading
 import time
@@ -58,6 +59,7 @@ def readlog(logflag):
     else:
         compare = " "
 
+    ctime = datetime.datetime.today() - datetime.timedelta(days=4)
     log = ""
     try:
         f = open("/var/log/pid_{:s}.log".format(time.strftime("%Y-%m")),"r")
@@ -70,9 +72,12 @@ def readlog(logflag):
     while True:
         rl = f.readline()
         if not rl:
-            break;
+            break
         line = str(rl)
-        if line.find(compare) != -1:
+        if line.find(compare) == -1:
+            continue
+        date = datetime.datetime.strptime(line[:10], "%Y-%m-%d")
+        if date > ctime:
             log += line.replace('\n', "<br>")
 
     if log == "":
