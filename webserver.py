@@ -82,20 +82,20 @@ def readlog(logflag):
 
 #----------------------------[generatehtml]
 def generatehtml(logflag):
-    html  = "<!docstype html>"
-    html += "<html lang='de'>"
-    html += "<head>"
-    html += "<meta charset='UTF-8'>"
-    html += "<meta name='viewport' content='width=device-width, initial-scale=1'>"
-    html += "<title>PId</title>"
+    html  = "<!docstype html>\r\n"
+    html += "<html lang='de'>\r\n"
+    html += "<head>\r\n"
+    html += "<meta charset='UTF-8'>\r\n"
+    html += "<meta name='viewport' content='width=device-width, initial-scale=1'>\r\n"
+    html += "<title>PId</title>\r\n"
     if logflag == 0:
-        html += "<meta http-equiv='refresh' content='10'>"
-    html += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>"
-    html += "<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.1.1/css/all.css' integrity='sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ' crossorigin='anonymous'>"
-    html += "</head>"
-    html += "<body>"
-    html += "<div class='container'>"
-    html += "<main>"
+        html += "<meta http-equiv='refresh' content='10'>\r\n"
+    html += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>\r\n"
+    html += "<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.1.1/css/all.css' integrity='sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ' crossorigin='anonymous'>\r\n"
+    html += "</head>\r\n"
+    html += "<body>\r\n"
+    html += "<div class='container'>\r\n"
+    html += "<main>\r\n"
     if logflag == 0:
         html += "<h2><i class='fas fa-home'></i> PId</h2>"
         html += "<p>{:s}</p>".format(time.strftime("%d.%m.%Y %H:%M:%S",time.localtime()))
@@ -161,10 +161,10 @@ def generatehtml(logflag):
         html += readlog(logflag)
         html += "</pre></p>"
         html += "<form action='' method='post'><button type='submit' class='btn btn-primary btn-sm' name='mpage'><i class='fas fa-caret-left'></i> &Uuml;bersicht</button></form>"
-    html += "</main>"
-    html += "</div>"
-    html += "</body>"
-    html += "</html>"
+    html += "\r\n</main>\r\n"
+    html += "</div>\r\n"
+    html += "</body>\r\n"
+    html += "</html>\r\n"
     return html
 
 #----------------------------[RequestHandler]
