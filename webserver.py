@@ -76,9 +76,13 @@ def readlog(logflag):
         line = str(rl)
         if line.find(compare) == -1:
             continue
-        date = datetime.datetime.strptime(line[:10], "%Y-%m-%d")
-        if date > ctime:
-            log += line.replace('\n', "<br>")
+        try:
+            date = datetime.datetime.strptime(line[:10], "%Y-%m-%d")
+            if date < ctime:
+                continue
+        except Exception:
+            pass
+        log += line.replace('\n', "<br>")
 
     if log == "":
         log = "nothing to display<br>"
