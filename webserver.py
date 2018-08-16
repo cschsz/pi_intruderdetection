@@ -247,14 +247,23 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.resp_location(val[pos:pos+4])
                 return
         elif val.find("arm1=") != -1:
-            log.info("event", "armed [{:s}]".format(self.address_string()))
-            fkt_armedupdate(1)
+            if fkt_alarmstate() == 0:
+                log.info("event", "armed [{:s}]".format(self.address_string()))
+                fkt_armedupdate(1)
+            else:
+                log.info("event", "armed ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
         elif val.find("arm2=") != -1:
-            log.info("event", "armed2 [{:s}]".format(self.address_string()))
-            fkt_armedupdate(2)
+            if fkt_alarmstate() == 0:
+                log.info("event", "armed2 [{:s}]".format(self.address_string()))
+                fkt_armedupdate(2)
+            else:
+                log.info("event", "armed2 ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
         elif val.find("disarm=") != -1:
-            log.info("event", "disarmed [{:s}]".format(self.address_string()))
-            fkt_armedupdate(0)
+            if fkt_alarmstate():
+                log.info("event", "disarmed [{:s}]".format(self.address_string()))
+                fkt_armedupdate(0)
+            else:
+                log.info("event", "disarmed ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
         elif val.find("test1=") != -1:
             log.info("event", "test siren [{:s}]".format(self.address_string()))
             fkt_siren(1)
