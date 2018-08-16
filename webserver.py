@@ -247,19 +247,19 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.resp_location(val[pos:pos+4])
                 return
         elif val.find("arm1=") != -1:
-            if fkt_alarmstate() == 0:
+            if fkt_armedstate() == 0:
                 log.info("event", "armed [{:s}]".format(self.address_string()))
                 fkt_armedupdate(1)
             else:
                 log.info("event", "armed ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
         elif val.find("arm2=") != -1:
-            if fkt_alarmstate() == 0:
+            if fkt_armedstate() == 0:
                 log.info("event", "armed2 [{:s}]".format(self.address_string()))
                 fkt_armedupdate(2)
             else:
                 log.info("event", "armed2 ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
         elif val.find("disarm=") != -1:
-            if fkt_alarmstate():
+            if fkt_armedstate():
                 log.info("event", "disarmed [{:s}]".format(self.address_string()))
                 fkt_armedupdate(0)
             else:
