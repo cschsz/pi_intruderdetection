@@ -22,6 +22,7 @@ s_stoggle = True
 s_scnt = 0
 s_rfcode = ""
 s_rflcode = ""
+s_dobeep = 0
 
 #----------------------------[alarmstate]
 def alarmstate():
@@ -46,6 +47,7 @@ def armedupdate(val):
 def rfupdate(code):
     global s_rfcode
     global s_rflcode
+    global s_dobeep
 
     s_rfcode = code
     if s_rflcode != s_rfcode:
@@ -53,19 +55,11 @@ def rfupdate(code):
         if   s_rfcode == "86356":
             log.info("event", "armed by " + code)
             armedupdate(2)
-            fkt_beeper(1)
-            time.sleep(1)
-            fkt_beeper(0)
-            time.sleep(1)
-            fkt_beeper(1)
-            time.sleep(1)
-            fkt_beeper(0)
+            s_dobeep = 1
         elif s_rfcode == "86353":
             log.info("event", "disarmed by " + code)
             armedupdate(0)
-            fkt_beeper(1)
-            time.sleep(1)
-            fkt_beeper(0)
+            s_dobeep = 2
     return
 
 #----------------------------[pir_check]
@@ -99,6 +93,23 @@ def pir_check():
 def alarm_check():
     global s_atoggle
     global s_needrst
+    global s_dobeep
+
+    if s_dobeep == 1:
+        s_dobeep = 0
+        GPIO.beeper(1)
+        time.sleep(1)
+        GPIO.beeper(0)
+
+    if s_dobeep == 2:
+        s_dobeep = 0
+        GPIO.beeper(1)
+        time.sleep(1)
+        GPIO.beeper(0)
+        time.sleep(1)
+        GPIO.beeper(1)
+        time.sleep(1)
+        GPIO.beeper(0)
 
     if armedstate():
         if s_pirdetection == True:
