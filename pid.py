@@ -52,11 +52,11 @@ def rfupdate(code):
     s_rfcode = code
     if s_rflcode != s_rfcode:
         s_rflcode = s_rfcode
-        if   s_rfcode == "86356":
+        if   s_rfcode == "86356" or s_rfcode == "87124" or s_rfcode == "87364" or s_rfcode == "87316":
             log.info("event", "armed by " + code)
             armedupdate(2)
             s_dobeep = 1
-        elif s_rfcode == "86353":
+        elif s_rfcode == "86353" or s_rfcode == "87121" or s_rfcode == "87361" or s_rfcode == "87313":
             log.info("event", "disarmed by " + code)
             armedupdate(0)
             s_dobeep = 2
