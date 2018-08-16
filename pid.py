@@ -53,9 +53,19 @@ def rfupdate(code):
         if   s_rfcode == "86356":
             log.info("event", "armed by " + code)
             armedupdate(2)
+            fkt_beeper(1)
+            time.sleep(1)
+            fkt_beeper(0)
+            time.sleep(1)
+            fkt_beeper(1)
+            time.sleep(1)
+            fkt_beeper(0)
         elif s_rfcode == "86353":
             log.info("event", "disarmed by " + code)
             armedupdate(0)
+            fkt_beeper(1)
+            time.sleep(1)
+            fkt_beeper(0)
     return
 
 #----------------------------[pir_check]
