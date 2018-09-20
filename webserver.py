@@ -267,12 +267,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         elif val.find("test1=") != -1:
             log.info("event", "test siren [{:s}]".format(self.address_string()))
             fkt_siren(1)
-            time.sleep(1)
+            time.sleep(5)
             fkt_siren(0)
         elif val.find("test2=") != -1:
             log.info("event", "test beeper [{:s}]".format(self.address_string()))
             fkt_beeper(1)
-            time.sleep(1)
+            time.sleep(5)
             fkt_beeper(0)
         self.resp_location("/")
 

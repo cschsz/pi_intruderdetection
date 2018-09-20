@@ -55,5 +55,5 @@ def start(fcodeupdate):
 
     fkt_codeupdate = fcodeupdate
     thread = threading.Thread(target=rfthread, args=[])
-    thread.start()
+    #thread.start()
     return
