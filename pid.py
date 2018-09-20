@@ -23,6 +23,12 @@ s_scnt = 0
 s_rfcode = ""
 s_rflcode = ""
 s_dobeep = 0
+s_teststate = 0
+
+#----------------------------[alarmstate]
+def teststate(val):
+    global s_teststate
+    s_teststate = val
 
 #----------------------------[alarmstate]
 def alarmstate():
@@ -41,7 +47,6 @@ def armedstate():
 def armedupdate(val):
     global s_armed
     s_armed = val
-    return
 
 #----------------------------[rfupdate]
 def rfupdate(code):
@@ -94,6 +99,19 @@ def alarm_check():
     global s_atoggle
     global s_needrst
     global s_dobeep
+    global s_teststate
+
+    if s_teststate == 1:
+        s_teststate = 0
+        GPIO.siren(1)
+        time.sleep(5)
+        GPIO.siren(0)
+
+    if s_teststate == 2:
+        s_teststate = 0
+        GPIO.beeper(1)
+        time.sleep(5)
+        GPIO.beeper(0)
 
     if s_dobeep == 1:
         s_dobeep = 0
@@ -151,7 +169,7 @@ def main():
     # init
     GPIO.init()
     rf.start(rfupdate)
-    webserver.start(alarmstate, armedstate, armedupdate, GPIO.siren, GPIO.beeper)
+    webserver.start(alarmstate, armedstate, armedupdate, teststate)
 
     # running
     while True:

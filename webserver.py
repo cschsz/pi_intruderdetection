@@ -15,8 +15,7 @@ s_key  = ""
 fkt_alarmstate  = None
 fkt_armedstate  = None
 fkt_armedupdate = None
-fkt_siren       = None
-fkt_beeper      = None
+fkt_test        = None
 
 FAVICON = b"AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAB\
             ILAAASCwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\
@@ -142,7 +141,7 @@ def generatehtml(logflag):
         html += "<div class='alert alert-warning' role='alert'>Haust&uuml;r: ?</div>"
         html += "<div class='alert alert-warning' role='alert'>Kellert&uuml;r: ?</div>"
         html += "<div class='alert alert-warning' role='alert'>Klingel: ?</div>"
-        html += "<div class='alert alert-warning' role='alert'>Gasmelder: ?</div>"
+        #html += "<div class='alert alert-warning' role='alert'>Gasmelder: ?</div>"
         html += "<hr>"
         html += "Protokolldateien<br>"
         html += "<form action='' method='post'>"
@@ -266,14 +265,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                 log.info("event", "disarmed ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
         elif val.find("test1=") != -1:
             log.info("event", "test siren [{:s}]".format(self.address_string()))
-            fkt_siren(1)
-            time.sleep(5)
-            fkt_siren(0)
+            fkt_test(1)
         elif val.find("test2=") != -1:
             log.info("event", "test beeper [{:s}]".format(self.address_string()))
-            fkt_beeper(1)
-            time.sleep(5)
-            fkt_beeper(0)
+            fkt_test(2)
         self.resp_location("/")
 
     def do_POST(self):
@@ -361,18 +356,16 @@ def stop():
     return
 
 #----------------------------[start]
-def start(falarmstate, farmedstate, farmedupdate, fktsiren, fktbeeper):
+def start(falarmstate, farmedstate, farmedupdate, fkttest):
     global fkt_alarmstate
     global fkt_armedstate
     global fkt_armedupdate
-    global fkt_siren
-    global fkt_beeper
+    global fkt_test
 
     fkt_alarmstate  = falarmstate
     fkt_armedstate  = farmedstate
     fkt_armedupdate = farmedupdate
-    fkt_siren       = fktsiren
-    fkt_beeper      = fktbeeper
+    fkt_test        = fkttest
 
     thread = threading.Thread(target=serverthread, args=[])
     thread.start()
