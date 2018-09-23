@@ -116,17 +116,17 @@ def alarm_check():
     if s_dobeep == 1:
         s_dobeep = 0
         GPIO.beeper(1)
-        time.sleep(1)
+        time.sleep(0.5)
         GPIO.beeper(0)
 
     if s_dobeep == 2:
         s_dobeep = 0
         GPIO.beeper(1)
-        time.sleep(1)
+        time.sleep(0.5)
         GPIO.beeper(0)
-        time.sleep(1)
+        time.sleep(0.5)
         GPIO.beeper(1)
-        time.sleep(1)
+        time.sleep(0.5)
         GPIO.beeper(0)
 
     if armedstate():
