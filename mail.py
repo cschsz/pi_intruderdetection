@@ -19,7 +19,7 @@ def send(subject, htmlbody):
         dest  = config["EMAIL"]["DESTINATION_EMAIL"]
     except KeyError:
         log.info("main", "pid.ini not filled")
-        return
+        return 0
 
     # email login
     try:
@@ -28,7 +28,7 @@ def send(subject, htmlbody):
         s.login(email, passw)
     except Exception as e:
         log.info("main", "SMTP error: " + str(e))
-        return
+        return 1
 
     # prepare email
     msg = MIMEMultipart('alternative')
@@ -49,7 +49,7 @@ def send(subject, htmlbody):
         s.sendmail(email, dest, msg.as_string())
         s.quit()
         log.info("main", "email send")
+        return 0
     except Exception as e:
         log.info("main", "SMTP error:" + str(e))
-
-    return
+        return 1

@@ -15,6 +15,7 @@ s_galarm = False
 t_ga = time.time()
 s_needrst = False
 s_pirdetection = False
+t_pirdetection = time.time()
 s_pircnt  = 0
 t_pirlast = time.time()
 s_atoggle = True
@@ -87,6 +88,7 @@ def pir_check():
     if s_pircnt >= 45:
         if s_pirdetection == False:
             s_pirdetection = True
+            t_pirdetection = time.time()
             if armedstate():
                 log.info("event", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
             else:
@@ -131,15 +133,23 @@ def alarm_check():
 
     if armedstate():
         if s_pirdetection == True:
-            if armedstate() == 1:
-                GPIO.siren(1)
+            if time.time() - t_pirdetection < 300:
+                if armedstate() == 1:
+                    GPIO.siren(1)
+                else:
+                    GPIO.beeper(1)
             else:
-                GPIO.beeper(1)
+                GPIO.beeper(0)
+                GPIO.siren(0)
             s_atoggle = not s_atoggle
             GPIO.ledred(s_atoggle)
             if s_needrst == False:
-                s_needrst = True
-                mail.send("ALARM", "PIR ALARM")
+                ret = mail.send("ALARM", "PIR ALARM")
+                if ret == 0:
+                    s_needrst = True
+                else:
+                    time.sleep(5)
+
         else:
             GPIO.ledred(1)
     else:
