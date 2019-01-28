@@ -14,6 +14,7 @@ s_hsvr = None
 s_key  = ""
 fkt_alarmstate  = None
 fkt_armedstate  = None
+fkt_armedtime   = None
 fkt_armedupdate = None
 fkt_test        = None
 
@@ -97,7 +98,10 @@ def generatehtml(logflag):
     html += "<meta name='viewport' content='width=device-width, initial-scale=1'>\r\n"
     html += "<title>PId</title>\r\n"
     if logflag == 0:
-        html += "<meta http-equiv='refresh' content='10'>\r\n"
+        if   fkt_armedstate() == 1:
+            html += "<meta http-equiv='refresh' content='1'>\r\n"
+        else:
+            html += "<meta http-equiv='refresh' content='10'>\r\n"
     html += "<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css' integrity='sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm' crossorigin='anonymous'>\r\n"
     html += "<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.1.1/css/all.css' integrity='sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ' crossorigin='anonymous'>\r\n"
     html += "</head>\r\n"
@@ -109,11 +113,13 @@ def generatehtml(logflag):
         html += "<p>{:s}</p>".format(time.strftime("%d.%m.%Y %H:%M:%S",time.localtime()))
         html += "<hr>"
         if   fkt_armedstate() == 1:
-            html += "Status: scharf <i class='fas fa-lock'></i>"
+            html += "Status: <i class='fas fa-user-clock'></i> Scharfschaltung in {:d} Sekunden...".format(int(60 - (time.time() - fkt_armedtime())))
         elif fkt_armedstate() == 2:
-            html += "Status: teilscharf <i class='fas fa-user-lock'></i>"
+            html += "Status: <i class='fas fa-user-lock'></i> teilscharf"
+        elif fkt_armedstate() == 3:
+            html += "Status: <i class='fas fa-lock'></i> scharf"
         else:
-            html += "Status: unscharf <i class='fas fa-lock-open'></i>"
+            html += "Status: <i class='fas fa-lock-open'></i> unscharf"
         html += "<form action='' method='post'>"
         if fkt_armedstate() == 0:
             html += "<button type='submit' class='btn btn-danger btn-lg' name='arm1'>"
@@ -124,6 +130,11 @@ def generatehtml(logflag):
             html += "<button type='submit' class='btn btn-danger btn-lg' name='arm2'>"
             html += "Teilscharf&nbsp;"
             html += "<i class='fas fa-user-lock'></i>"
+            html += "</button>"
+        elif fkt_armedstate() == 1:
+            html += "<button type='submit' class='btn btn-warning btn-lg' name='disarm'>"
+            html += "Scharfschaltung abbrechen&nbsp;"
+            html += "<i class='fas fa-user-clock'></i>"
             html += "</button>"
         else:
             if fkt_alarmstate() == -1:
@@ -247,10 +258,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
         elif val.find("arm1=") != -1:
             if fkt_armedstate() == 0:
-                log.info("event", "armed [{:s}]".format(self.address_string()))
+                log.info("event", "arming [{:s}]".format(self.address_string()))
                 fkt_armedupdate(1)
             else:
-                log.info("event", "armed ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
+                log.info("event", "arming ignored ({:d}) [{:s}]".format(fkt_alarmstate(), self.address_string()))
         elif val.find("arm2=") != -1:
             if fkt_armedstate() == 0:
                 log.info("event", "armed2 [{:s}]".format(self.address_string()))
@@ -356,14 +367,16 @@ def stop():
     return
 
 #----------------------------[start]
-def start(falarmstate, farmedstate, farmedupdate, fkttest):
+def start(falarmstate, farmedstate, farmedtime, farmedupdate, fkttest):
     global fkt_alarmstate
     global fkt_armedstate
+    global fkt_armedtime
     global fkt_armedupdate
     global fkt_test
 
     fkt_alarmstate  = falarmstate
     fkt_armedstate  = farmedstate
+    fkt_armedtime   = farmedtime
     fkt_armedupdate = farmedupdate
     fkt_test        = fkttest
 

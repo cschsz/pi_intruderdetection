@@ -12,7 +12,6 @@ import rf
 s_armed = 0
 
 s_galarm = False
-t_ga = time.time()
 s_needrst = False
 s_pirdetection = False
 t_pirdetection = time.time()
@@ -25,6 +24,7 @@ s_rfcode = ""
 s_rflcode = ""
 s_dobeep = 0
 s_teststate = 0
+t_armed = time.time()
 
 #----------------------------[alarmstate]
 def teststate(val):
@@ -44,10 +44,17 @@ def alarmstate():
 def armedstate():
     return s_armed
 
+#----------------------------[armedtime]
+def armedtime():
+    return t_armed
+
 #----------------------------[armedupdate]
 def armedupdate(val):
     global s_armed
+    global t_armed
+
     s_armed = val
+    t_armed = time.time()
 
 #----------------------------[rfupdate]
 def rfupdate(code):
@@ -80,7 +87,7 @@ def pir_check():
         s_pircnt = 0
         if s_pirdetection == True:
             s_pirdetection = False
-            if armedstate():
+            if armedstate() > 1:
                 log.info("event", "pir reset ({:.0f})".format(time.time() - t_pirlast))
             else:
                 log.info("pir", "pir reset ({:.0f})".format(time.time() - t_pirlast))
@@ -89,7 +96,7 @@ def pir_check():
         if s_pirdetection == False:
             s_pirdetection = True
             t_pirdetection = time.time()
-            if armedstate():
+            if armedstate() > 1:
                 log.info("event", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
             else:
                 log.info("pir", "pir alarm ({:.0f})".format(time.time() - t_pirlast))
@@ -131,10 +138,18 @@ def alarm_check():
         time.sleep(0.5)
         GPIO.beeper(0)
 
-    if armedstate():
+    if armedstate() == 1:
+        GPIO.beeper(0)
+        GPIO.siren(0)
+        GPIO.ledred(1)
+        s_needrst = False
+        if time.time() - t_armed > 60:
+            log.info("event", "armed by time")
+            armedupdate(3)
+    elif armedstate() > 1:
         if s_pirdetection == True:
             if time.time() - t_pirdetection < 300:
-                if armedstate() == 1:
+                if armedstate() == 3:
                     GPIO.siren(1)
                 else:
                     GPIO.beeper(1)
@@ -149,7 +164,6 @@ def alarm_check():
                     s_needrst = True
                 else:
                     time.sleep(5)
-
         else:
             GPIO.ledred(1)
     else:
@@ -179,7 +193,7 @@ def main():
     # init
     GPIO.init()
     rf.start(rfupdate)
-    webserver.start(alarmstate, armedstate, armedupdate, teststate)
+    webserver.start(alarmstate, armedstate, armedtime, armedupdate, teststate)
 
     # running
     while True:
