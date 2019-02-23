@@ -80,6 +80,7 @@ def pir_check():
     global s_pirdetection
     global s_pircnt
     global t_pirlast
+    global t_pirdetection
 
     if GPIO.pir() == 1:
         s_pircnt += 1
@@ -113,13 +114,13 @@ def alarm_check():
     if s_teststate == 1:
         s_teststate = 0
         GPIO.siren(1)
-        time.sleep(5)
+        time.sleep(2.5)
         GPIO.siren(0)
 
     if s_teststate == 2:
         s_teststate = 0
         GPIO.beeper(1)
-        time.sleep(5)
+        time.sleep(2.5)
         GPIO.beeper(0)
 
     if s_dobeep == 1:
